@@ -2,8 +2,8 @@
 // Name        : bayrakdar-kurt-kabaagacliProject.cpp
 // Author      : ErkinKurt-H.MelihBayrakdar-CenkKabaagacli
 // Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Copyright   :
+// Description : SE311 2018 Project
 //============================================================================
 
 #include <iostream>
@@ -64,6 +64,7 @@ private:
     //State
 	vector<string> sideEffects;
 };
+//Forward declarations...
 class RadioTest;
 class LabTest;
 //Using observer pattern.
@@ -102,7 +103,7 @@ public:
     void setSignature(string signature){this->signature = signature;}
     string getSignature(){return this->signature;}
 
-    void setPhone(string phoneNumber){this->phoneNumber = phoneNumber;}
+    void setPhoneNumber(string phoneNumber){this->phoneNumber = phoneNumber;}
     string getPhoneNumber(){return this->phoneNumber;}
 
     vector<RadioTest*> getRadioTest(){return this->radioTests;}
@@ -129,174 +130,328 @@ private:
     vector<string> changedSideEffects;
 };
 
+//Using Command Pattern
+//Command Pattern --> Receiver(1).
+class Radiology{
+public:
+    void ActionEndocrinologyTest(Patient *p){
+        cout << "Endocrinology test has been done for the patient: " << p->getName() << endl;
+    }
+    void ActionXrayTest(Patient *p){
+        cout << "Xray test has been done for the patient: " << p->getName() << endl;
+    }
+    void ActionEKGTest(Patient *p){
+        cout << "EKG test has been done for the patient: " << p->getName() << endl;
+    }
+    static Radiology* getInstance(){
+        if(instance == NULL){
+            instance = new Radiology();
+        }
+        return instance;
+    }
+private:
+    static Radiology* instance;
+    Radiology(){};
+};
+
+//Using Command Pattern
+//Command Pattern ----> Receiver (2)
+class Laboratory {
+public:
+    void ActionEndocrinologyBloodTest(Patient *p){
+        cout << "Endocrinology blood test has been done for the patient" << p->getName() << endl;
+    }
+    void ActionOrthologyBloodTest(Patient *p){
+        cout << "Orthology blood test has been done for the patient." << p->getName() << endl;
+    }
+    void ActionCardiologyBloodTest(Patient *p){
+        cout << "Cardiology blood test has been done for the patient" << p->getName() << endl;
+    }
+};
 
 //Using Command Pattern.
-//Command Pattern --> Abstract receiver(1).
+//Command Pattern --> Abstract Command(1).
 class RadioTest {
 public:
-    virtual void ActionRadioTest(Patient *p) = 0;
+    virtual void ExecuteRadioTest(Patient *p) = 0;
+    virtual void setRadiology(Radiology *_r){
+        r = _r;
+    }
+protected:
+    Radiology *r;
 };
 
-// Using Command Pattern
-//Command Pattern --> Concrete receiver
+//Using Command Pattern
+//Command Pattern --> Concrete Command(1).
 class EndocrinologyTest : public RadioTest{
 public:
-    void ActionRadioTest(Patient *p){
-        cout << "Endocrinology test has been done for the patient" << p->getName() << endl;
-        //TODO Do we need to send the test result to the patient?
+    void ExecuteRadioTest(Patient *p){
+        r->ActionEndocrinologyTest(p);
     }
 };
 
 //Using Command Pattern
-//Command Pattern --> Concrete receiver.
+//Command Pattern --> Concrete Command(1)
 class XRAY : public RadioTest{
 public:
-    void ActionRadioTest(Patient *p){
-        cout << "XRAY test has been done for the patient." << p->getName() << endl;
+    void ExecuteRadioTest(Patient *p){
+        r->ActionXrayTest(p);
     }
 };
 
 //Using Command Pattern
-//Command Pattern --> Concrete receiver.
+//Command Pattern --> Concrete Command(1).
 class EKG : public RadioTest{
 public:
-    void ActionRadioTest(Patient *p){
-        cout << "EKG test has been done for the patient." << p->getName() << endl;
+    void ExecuteRadioTest(Patient *p){
+        r->ActionEndocrinologyTest(p);
     }
 };
 
+
+
 //Using Command Pattern.
-//Command Pattern --> Abstract receiver(2).
+//Command Pattern --> Abstract Command(2).
 class LabTest {
 public:
-    virtual void ActionLabTest(Patient *p) = 0;
+    virtual void ExecuteLabTest(Patient *p) = 0;
+    virtual void setLabratory(Laboratory *_lab){
+        lab = _lab;
+    }
+protected:
+    Laboratory *lab;
 };
 
 //Using Command Pattern
-//Command Pattern --> Concrete receiver(2).
+//Command Pattern --> Concrete Command(2).
 class EndocrinologyBloodTest : public LabTest {
 public:
-    void ActionLabTest(Patient *p){
-        cout << "Endocrinology blood test has been done for the patient." << p->getName() << endl;
+    void ExecuteLabTest(Patient *p){
+        lab->ActionEndocrinologyBloodTest(p);
     }
 };
 
 //Using Command Pattern
-//Command Pattern --> Concrete receiver(2).
-class OrthopedicsBloodTest : public LabTest {
+//Command Pattern --> Concrete Command(2).
+class OrthologyBloodTest : public LabTest {
 public:
-    void ActionLabTest(Patient *p){
-        cout << "Orthopedics blood test has been done for the patient." << p->getName() <<  endl;
+    void ExecuteLabTest(Patient *p){
+        lab->ActionOrthologyBloodTest(p);
     }
 };
 
 //Using Command Pattern
-//Command Pattern --> Concrete receiver(2).
+//Command Pattern --> Concrete Command(2).
 class CardiologyBloodTest : public LabTest{
 public:
-    void ActionLabTest(Patient *p){
-        cout << "Cardiology blood test has been done for the patient." << p->getName() << endl;
+    void ExecuteLabTest(Patient *p){
+        lab->ActionCardiologyBloodTest(p);
     }
 };
 
-//Using Template Pattern, Abstract Factory and Command Pattern.
-//Template pattern --> Abstract Template. Command Pattern ---> Abstract Command
-class Clinic {
+
+//Using Abstract Factory, Template Pattern
+//Abstract Factory Pattern ---> Abstract Factory
+//Template method ----> Record Patient.
+class Department {
 public:
-    virtual void ExecuteRadioTest(Patient *p) = 0;
-    virtual void ExecuteLabTest(Patient *p) = 0;
+    virtual RadioTest* CreateRadioTest(Radiology *r) = 0;
+    virtual LabTest* CreateLabTest(Laboratory *lab) = 0;
+    virtual void RecordPatient(Patient *p){
+        bool status = CheckPersonalDemgoraficInformation(p) && CheckInsuranceInformation(p)
+                        && CheckPastMedicalHistory(p) && CheckConsentForm(p);
+        cout << "Status : " << CheckPersonalDemgoraficInformation(p) << CheckInsuranceInformation(p) << CheckPastMedicalHistory(p) << CheckConsentForm(p) <<endl;
+        if(status){
+            cout << "Patient record has successfully registered." << endl;
+            patients.push_back(p);
+        }
+        else
+            cout << "Patient record has failed." << endl;
+    }
+
+    bool CheckPersonalDemgoraficInformation(Patient *p){
+        if(p->getEmail().empty() || p->getPhoneNumber().empty()){
+            return false;
+        }
+        else
+            return true;
+    }
+
+    //Assumption: If patient is already in the departments record, don't register the patient again, else register the patient.
+    //We did not assume that it would differ for each department...
+    bool CheckPastMedicalHistory(Patient *p){
+        for(int i = 0; i < patients.size(); i++){
+            if(p->getEmail() == patients[i]->getEmail()){
+
+                return false;
+            }
+        }
+        return true;
+    }
+    virtual bool CheckInsuranceInformation(Patient *p) = 0;
+
+    virtual bool CheckConsentForm(Patient *p) = 0;
+
+
 
 private:
-    vector<Patient> patients;
+    vector<Patient*> patients;
 };
 
-//Using Command Pattern.
-//Command Pattern --> Concrete Command.
-class CardiologyClinic : public Clinic{
+//Using Abstract Factory Pattern
+//Abstract Factory Pattern ---> Concrete Factory
+class CardiologyClinic : public Department{
 public:
-    void ExecuteRadioTest(Patient *p){
-        ekgTest->ActionRadioTest(p);
+    RadioTest* CreateRadioTest(Radiology *r){
+        EKG *e = new EKG();
+        e->setRadiology(r);
+        return e;
     }
-    void ExecuteLabTest(Patient *p){
-        cardiologyBloodTest->ActionLabTest(p);
+    LabTest* CreateLabTest(Laboratory *lab){
+        CardiologyBloodTest *c = new CardiologyBloodTest();
+        c->setLabratory(lab);
+        return c;
     }
+    //Assumption: Cardiology accepts Government insurance and all the other insurance.
+    bool CheckInsuranceInformation(Patient *p){
+        if(p->getInsurance().empty())
+            return false;
+        else{
+         return true;
+        }
+    }
+
+    bool CheckConsentForm(Patient *p){
+        cout << "This is Cardiology Consent Form : " << endl << "Your signature please." << endl;
+        if(p->getSignature().empty())
+            return false;
+        else
+            return true;
+    }
+
     CardiologyClinic(){}
-    CardiologyClinic(RadioTest *ekgTest, LabTest *cardiologyBloodTest): ekgTest(ekgTest), cardiologyBloodTest(cardiologyBloodTest){}
-private:
-    RadioTest *ekgTest;
-    LabTest *cardiologyBloodTest;
 };
 
-//Using Command Pattern.
-//Command Pattern --> Concrete Command.
-class OrthopedicsClinic : public Clinic {
+//Using Abstract Factory Pattern
+//Abstract Factory Pattern ---> Concrete Factory
+class OrthopedicsClinic : public Department {
 public:
-    void ExecuteRadioTest(Patient *p){
-        xrayTest->ActionRadioTest(p);
+    RadioTest* CreateRadioTest(Radiology *r){
+        XRAY *x = new XRAY();
+        x->setRadiology(r);
+        return x;
     }
-    void ExecuteLabTest(Patient *p){
-        orthopedicsBloodTest->ActionLabTest(p);
+    LabTest* CreateLabTest(Laboratory *lab){
+        OrthologyBloodTest *ort = new OrthologyBloodTest();
+        ort->setLabratory(lab);
+        return ort;
     }
+
+    //Assumption: Orthopedics does not accept Government insurance but, it accepts all the other insurance.
+    bool CheckInsuranceInformation(Patient *p){
+        if(p->getInsurance() == "Goverment" || p->getInsurance().empty())
+            return false;
+        else{
+         return true;
+        }
+    }
+
+    bool CheckConsentForm(Patient *p){
+        cout << "This is Orthopedics Consent Form : " << endl << "Your signature please." << endl;
+        if(p->getSignature().empty())
+            return false;
+        else
+            return true;
+    }
+
     OrthopedicsClinic(){}
-    OrthopedicsClinic(RadioTest *xrayTest, LabTest* orthoBloodTest): xrayTest(xrayTest), orthopedicsBloodTest(orthoBloodTest){}
-private:
-    RadioTest *xrayTest;
-    LabTest *orthopedicsBloodTest;
+
 };
 
-//Using Command Pattern.
-//Command Pattern --> Concrete Command.
-class EndocrinologyClinic : public Clinic{
+//Using Abstract Factory Pattern
+//Abstract Factory Pattern ---> Concrete Factory
+class EndocrinologyClinic : public Department{
 public:
-    void ExecuteRadioTest(Patient *p){
-        endocrinologyTest->ActionRadioTest(p);
+    RadioTest* CreateRadioTest(Radiology *r){
+        EndocrinologyTest *e = new EndocrinologyTest();
+        e->setRadiology(r);
+        return e;
     }
-    void ExecuteLabTest(Patient *p){
-        endocrinologyBloodTest->ActionLabTest(p);
+    LabTest* CreateLabTest(Laboratory *lab){
+        EndocrinologyBloodTest *endo = new EndocrinologyBloodTest();
+        endo->setLabratory(lab);
+        return endo;
+    }
+    //Assumption: Endocrinology does not accept Government insurance excepts all the other insurance.
+    bool CheckInsuranceInformation(Patient *p){
+        if(p->getInsurance() == "Goverment" || p->getInsurance().empty())
+            return false;
+        else{
+         return true;
+        }
+    }
+
+    bool CheckConsentForm(Patient *p){
+        cout << "This is Endocrinology Consent Form : " << endl << "Your signature please." << endl;
+        if(p->getSignature().empty())
+            return false;
+        else
+            return true;
     }
     EndocrinologyClinic(){}
-    EndocrinologyClinic(RadioTest *endocrinologyTest, LabTest *endocrinologyBloodTest) : endocrinologyTest(endocrinologyTest), endocrinologyBloodTest(endocrinologyBloodTest){}
-private:
-    RadioTest *endocrinologyTest;
-    LabTest *endocrinologyBloodTest;
 };
 
-//Using Command Pattern.
-//Command -----> Invoker.
+//Using Command Pattern, AbstractFactory
+//Command -----> Invoker. //AbstractFactory ----> Client
 class Doctor {
 public:
-    void PlaceRadioTest(Clinic *c){
-        c->ExecuteRadioTest(patient);
+    void OrderRadioTest(){
+        radioTest->ExecuteRadioTest(patient);
     }
-    void PlaceLabTest(Clinic *c){
-        c->ExecuteLabTest(patient);
+    void OrderLabTest(){
+        labTest->ExecuteLabTest(patient);
     }
     void setPatient(Patient *p){
         this->patient = p;
     }
+    void createRadiologyTest(Department *d, Radiology *r){
+        radioTest = d->CreateRadioTest(r);
+    }
+    void createLaboratoryTest(Department *d, Laboratory *lab){
+        labTest = d->CreateLabTest(lab);
+    }
 private:
     Patient *patient;
+    RadioTest *radioTest;
+    LabTest *labTest;
 };
-
+Radiology *Radiology::instance = NULL;
 
 int main() {
     Doctor *dc = new Doctor();
     Patient *motherPatient = new Patient();
     motherPatient->setName("Erkin Russia");
+    motherPatient->setEmail("ErkinKurt@gmail.com");
+    motherPatient->setPhoneNumber("0505050550");
+    motherPatient->setSignature("BabaSignature");
+    motherPatient->setInsurance("OtherInsurance");
     Subject *drug = new Drug();
     Observer *patient = new Patient();
     drug->Attach(patient);
-    dc->setPatient(motherPatient);
-    LabTest *orto = new OrthopedicsBloodTest();
-    RadioTest *ortoo = new XRAY();
-    Clinic *mother = new OrthopedicsClinic(ortoo,orto);
-
 
     drug->setDrugName("Lefkosaa ORTAM");
     vector<string> side;
     side.push_back("Circir");   side.push_back("Bok bocegi"); side.push_back("Aglama hamza");
     drug->AddSideEffects(side);
-    dc->PlaceLabTest(mother);
+    Department *orthopedicsClinic = new OrthopedicsClinic();
+    orthopedicsClinic->RecordPatient(motherPatient);
+    dc->setPatient(motherPatient);
+    Laboratory *lab = new Laboratory();
+
+    Radiology *r = Radiology::getInstance();
+    dc->createLaboratoryTest(orthopedicsClinic, lab);
+    dc->createRadiologyTest(orthopedicsClinic, r);
+    dc->OrderRadioTest();
 
 	return 0;
 }
