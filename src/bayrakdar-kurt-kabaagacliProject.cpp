@@ -1,16 +1,11 @@
 //============================================================================
 // Name        : bayrakdar-kurt-kabaagacliProject.cpp
 // Author      : ErkinKurt-H.MelihBayrakdar-CenkKabaagacli
-// Version     :
-// Copyright   :
 // Description : SE311 2018 Project
 //============================================================================
-
 #include <iostream>
 #include <vector>
 using namespace std;
-
-
 class Subject;
 //Using observer pattern.
 //Observer Interface
@@ -18,7 +13,6 @@ class Observer{
 public:
 	virtual void Update(Subject& subject) = 0;
 };
-
 //Using observer pattern.
 //Subject Interface
 class Subject {
@@ -32,17 +26,14 @@ public:
 			observers[i]->Update(*this);
 		}
 	}
-
 	virtual vector<string> GetSideEffects(){};
-
 	virtual void AddSideEffects(vector<string> newSideEffects){};
-	void setDrugName(string dName){}
-	string getDrugName(){}
+	virtual void setDrugName(string dName){}
+	virtual string getDrugName(){}
 
 private:
 	 vector<Observer*> observers;
 };
-
 //Using observer pattern.ExecuteRadioTest
 //Subject of Prescription
 class Drug : public Subject{
@@ -57,8 +48,8 @@ public:
 		//Notify observers...
 		Notify();
 	}
-	void setDrugName(string dName){this->drugName = dName;}
-	string getDrugName(){return this->drugName;}
+	void setDrugName(string dName){drugName = dName;}
+	string getDrugName(){return drugName;}
 private:
     string drugName;
     //State
@@ -74,59 +65,46 @@ public:
     Patient(){}
     Patient(string name, string email,string insurance, string signature): name(name), email(email),
         insurance(insurance), signature(signature){}
-
     //Add a drug to the prescription.
     void AddDrug(Drug *newDrug){
         drugs.push_back(newDrug);
     }
     void Update(Subject& sub){
-
         changedSideEffects = sub.GetSideEffects();
-        cout << "Sent e-mail to this address." << endl;
-        cout << "This drug's side effects has been changed. Current side effects are as follows:" << endl;
-
+        cout << "Sent e-mail to "<< email << endl;
+        cout << sub.getDrugName() <<" side effects has been changed. Current side effects are as follows:" << endl;
         for(int i = 0; i < changedSideEffects.size(); i++){
-
             cout << changedSideEffects[i] << endl;
         }
+        cout << endl;
     }
-
     void setName(string name){this->name = name;}
     string getName(){return this->name;}
-
     void setEmail(string email){this->email = email;}
     string getEmail(){return this->email;}
-
     void setInsurance(string insurance){this->insurance = insurance;}
     string getInsurance(){return this->insurance;}
-
     void setSignature(string signature){this->signature = signature;}
     string getSignature(){return this->signature;}
-
     void setPhoneNumber(string phoneNumber){this->phoneNumber = phoneNumber;}
     string getPhoneNumber(){return this->phoneNumber;}
-
     vector<RadioTest*> getRadioTest(){return this->radioTests;}
     void AddRadioTest(RadioTest *radioTest){
         radioTests.push_back(radioTest);
     }
-
     vector<LabTest*> getLabTest(){return this->labTests;}
     void AddLabTest(LabTest *labTest){
         labTests.push_back(labTest);
     }
-
     void printTestResults(){
         cout << "This is the test results for the patient : " << name << endl;
         for(int i = 0; i < testResults.size(); i++){
             cout << i+1 << ": " << testResults[i] << endl;
         }
     }
-
     void AddNewTestResults(string newTestResults){
 		testResults.push_back(newTestResults);
 	}
-
 private:
     string name;
     string phoneNumber;
@@ -142,7 +120,6 @@ private:
     //This is the vector to store the test result of the patient.
     vector<string> testResults;
 };
-
 //Using Command Pattern
 //Command Pattern --> Receiver(1).
 class Radiology{
@@ -152,19 +129,16 @@ public:
         p->AddNewTestResults(testResult);
         cout << testResult  << " for the patient: " << p->getName() << endl;
     }
-
     void ActionXrayTest(Patient *p){
         string testResult = "Xray test has been done ";
         p->AddNewTestResults(testResult);
         cout << testResult<<  " for the patient: " << p->getName() << endl;
     }
-
     void ActionEKGTest(Patient *p){
         string testResult = "EKG test has been done";
         p->AddNewTestResults(testResult);
         cout << testResult <<  " for the patient: "<< p->getName() << endl;
     }
-
     static Radiology* getInstance(){
         if(instance == NULL){
             instance = new Radiology();
@@ -175,7 +149,6 @@ private:
     static Radiology* instance;
     Radiology(){};
 };
-
 //Using Command Pattern
 //Command Pattern ----> Receiver (2)
 class Laboratory {
@@ -185,20 +158,17 @@ public:
         p->AddNewTestResults(testResult);
         cout << testResult<< " for the patient: " << p->getName() << endl;
     }
-
     void ActionOrthologyBloodTest(Patient *p){
         string testResult = "Orthopedics blood test has been done ";
         p->AddNewTestResults(testResult);
         cout << testResult << " for the patient: "<< p->getName() << endl;
     }
-
     void ActionCardiologyBloodTest(Patient *p){
         string testResult = "Cardiology blood test has been done ";
         p->AddNewTestResults(testResult);
         cout << testResult<< " for the patient: " << p->getName() << endl;
     }
 };
-
 //Using Command Pattern.
 //Command Pattern --> Abstract Command(1).
 class RadioTest {
@@ -210,7 +180,6 @@ public:
 protected:
     Radiology *r;
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(1).
 class EndocrinologyTest : public RadioTest{
@@ -219,7 +188,6 @@ public:
         r->ActionEndocrinologyTest(p);
     }
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(1)
 class XRAY : public RadioTest{
@@ -228,7 +196,6 @@ public:
         r->ActionXrayTest(p);
     }
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(1).
 class EKG : public RadioTest{
@@ -237,9 +204,6 @@ public:
         r->ActionEKGTest(p);
     }
 };
-
-
-
 //Using Command Pattern.
 //Command Pattern --> Abstract Command(2).
 class LabTest {
@@ -251,7 +215,6 @@ public:
 protected:
     Laboratory *lab;
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(2).
 class EndocrinologyBloodTest : public LabTest {
@@ -260,7 +223,6 @@ public:
         lab->ActionEndocrinologyBloodTest(p);
     }
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(2).
 class OrthologyBloodTest : public LabTest {
@@ -269,7 +231,6 @@ public:
         lab->ActionOrthologyBloodTest(p);
     }
 };
-
 //Using Command Pattern
 //Command Pattern --> Concrete Command(2).
 class CardiologyBloodTest : public LabTest{
@@ -278,8 +239,6 @@ public:
         lab->ActionCardiologyBloodTest(p);
     }
 };
-
-
 //Using Abstract Factory, Template Pattern
 //Abstract Factory Pattern ---> Abstract Factory
 //Template method ----> Record Patient.
@@ -298,7 +257,6 @@ public:
         else
             cout << "Patient has been failed to record to the "<< name <<"." << endl;
     }
-
     bool CheckPersonalDemgoraficInformation(Patient *p){
         if(p->getEmail().empty() || p->getPhoneNumber().empty()){
             return false;
@@ -306,7 +264,6 @@ public:
         else
             return true;
     }
-
     //Assumption: If patient is already in the departments record, don't register the patient again, else register the patient.
     //We did not assume that it would differ for each department...
     bool CheckPastMedicalHistory(Patient *p){
@@ -330,7 +287,6 @@ protected:
 private:
     vector<Patient*> patients;
 };
-
 //Using Abstract Factory Pattern
 //Abstract Factory Pattern ---> Concrete Factory
 class CardiologyClinic : public Department{
@@ -353,7 +309,6 @@ public:
          return true;
         }
     }
-
     bool CheckConsentForm(Patient *p){
         cout << "This is Cardiology Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
@@ -361,12 +316,10 @@ public:
         else
             return true;
     }
-
     CardiologyClinic(){
         name = "Cardiology Clinic";
     }
 };
-
 //Using Abstract Factory Pattern
 //Abstract Factory Pattern ---> Concrete Factory
 class OrthopedicsClinic : public Department {
@@ -381,7 +334,6 @@ public:
         ort->setLabratory(lab);
         return ort;
     }
-
     //Assumption: Orthopedics does not accept Government insurance but, it accepts all the other insurance.
     bool CheckInsuranceInformation(Patient *p){
         if(p->getInsurance() == "Government" || p->getInsurance().empty())
@@ -390,7 +342,6 @@ public:
          return true;
         }
     }
-
     bool CheckConsentForm(Patient *p){
         cout << "This is Orthopedics Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
@@ -398,13 +349,11 @@ public:
         else
             return true;
     }
-
     OrthopedicsClinic(){
         name = "Orthopedics Clinic";
     }
 
 };
-
 //Using Abstract Factory Pattern
 //Abstract Factory Pattern ---> Concrete Factory
 class EndocrinologyClinic : public Department{
@@ -427,7 +376,6 @@ public:
          return true;
         }
     }
-
     bool CheckConsentForm(Patient *p){
         cout << "This is Endocrinology Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
@@ -479,7 +427,6 @@ public:
         }
         cout << "Patient is not in the department's list. " << endl;
     }
-
 private:
     Patient *patient;
     RadioTest *radioTest;
@@ -500,13 +447,11 @@ int main() {
     Department *cardiologyClinic = new CardiologyClinic();
 
     //Set the doctor's department's...
-
     endoDoctor->setDepartment(endocrinologyClinic);
     orthoDoctor->setDepartment(orthopedicsClinic);
     cardioDoctor->setDepartment(cardiologyClinic);
 
     //2 different patients with different insurances.
-
     Patient *patient_1 = new Patient();
     patient_1->setName("Erkin Kurt Cobain");
     patient_1->setEmail("kurt.erkin@gmail.com");
@@ -521,8 +466,7 @@ int main() {
     patient_2->setSignature("HamzaMelihFlagbearerDigitalSignal");
     patient_2->setInsurance("Private");
 
-
-    //Recording the patients to the departments...
+    //Recording the patients to the departments...Testing template pattern.
     cardiologyClinic->RecordPatient(patient_1);cout << endl;
     orthopedicsClinic->RecordPatient(patient_1);cout << endl;
     endocrinologyClinic->RecordPatient(patient_1);cout << endl;
@@ -533,11 +477,11 @@ int main() {
 
     //Laboratory and Radiology instantiation...
     Laboratory *laboratory = new Laboratory();
-    Radiology *radiology = Radiology::getInstance();
+    Radiology *radiology = Radiology::getInstance();//Singleton pattern.
 
     //Ordering the tests for patient_1...
+    //Creating tests with abstract factory pattern. Ordering tests with command pattern.
     //First find the patient and order test. //Search Patient finds the patient and sets the patient to the doctor.
-
     //Since the patient couldn't register to the department because of his/her insurance, doctor cant order tests.
     endoDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
 
@@ -570,20 +514,25 @@ int main() {
     cardioDoctor->OrderLabTest();
     cardioDoctor->OrderRadioTest();cout << endl;
 
-
     //Display the patients' test results.
     patient_1->printTestResults();cout << endl;
-
     patient_2->printTestResults();cout << endl;
+
+    //Adding drugs to the patients and testing the observer pattern.
+    Subject *drug_1 = new Drug();
+    drug_1->Attach(patient_1);
+    drug_1->Attach(patient_2);
+    drug_1->setDrugName("CardioDrug");
+    vector<string> side_effect_drug_1;
+    side_effect_drug_1.push_back("Headache");   side_effect_drug_1.push_back("Stomachache"); side_effect_drug_1.push_back("Flu");
+    drug_1->AddSideEffects(side_effect_drug_1);
+
+    Subject *drug_2 = new Drug();
+    drug_2->Attach(patient_2);
+    drug_2->setDrugName("EndoDrug");
+    vector<string> side_effect_drug_2;
+    side_effect_drug_2.push_back("Sweating");   side_effect_drug_2.push_back("Insomnia"); side_effect_drug_2.push_back("Cough");
+    drug_2->AddSideEffects(side_effect_drug_2);
 
 	return 0;
 }
-
-//Subject *drug = new Drug();
-    //Observer *patient = new Patient();
-    //drug->Attach(patient);
-
-    //drug->setDrugName("Lefkosaa ORTAM");
-    //vector<string> side;
-   // side.push_back("Circir");   side.push_back("Bok bocegi"); side.push_back("Aglama hamza");
-   // drug->AddSideEffects(side);
