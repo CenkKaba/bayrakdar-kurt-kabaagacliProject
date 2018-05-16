@@ -116,6 +116,17 @@ public:
         labTests.push_back(labTest);
     }
 
+    void printTestResults(){
+        cout << "This is the test results for the patient : " << name << endl;
+        for(int i = 0; i < testResults.size(); i++){
+            cout << i+1 << ": " << testResults[i] << endl;
+        }
+    }
+
+    void AddNewTestResults(string newTestResults){
+		testResults.push_back(newTestResults);
+	}
+
 private:
     string name;
     string phoneNumber;
@@ -128,6 +139,8 @@ private:
     vector<Drug*> drugs;
     //ObserverState
     vector<string> changedSideEffects;
+    //This is the vector to store the test result of the patient.
+    vector<string> testResults;
 };
 
 //Using Command Pattern
@@ -135,14 +148,23 @@ private:
 class Radiology{
 public:
     void ActionEndocrinologyTest(Patient *p){
-        cout << "Endocrinology test has been done for the patient: " << p->getName() << endl;
+        string testResult = "Endocrinology test has been done ";
+        p->AddNewTestResults(testResult);
+        cout << testResult  << " for the patient: " << p->getName() << endl;
     }
+
     void ActionXrayTest(Patient *p){
-        cout << "Xray test has been done for the patient: " << p->getName() << endl;
+        string testResult = "Xray test has been done ";
+        p->AddNewTestResults(testResult);
+        cout << testResult<<  " for the patient: " << p->getName() << endl;
     }
+
     void ActionEKGTest(Patient *p){
-        cout << "EKG test has been done for the patient: " << p->getName() << endl;
+        string testResult = "EKG test has been done";
+        p->AddNewTestResults(testResult);
+        cout << testResult <<  " for the patient: "<< p->getName() << endl;
     }
+
     static Radiology* getInstance(){
         if(instance == NULL){
             instance = new Radiology();
@@ -159,13 +181,21 @@ private:
 class Laboratory {
 public:
     void ActionEndocrinologyBloodTest(Patient *p){
-        cout << "Endocrinology blood test has been done for the patient" << p->getName() << endl;
+        string testResult = "Endocrinology blood test has been done";
+        p->AddNewTestResults(testResult);
+        cout << testResult<< " for the patient: " << p->getName() << endl;
     }
+
     void ActionOrthologyBloodTest(Patient *p){
-        cout << "Orthology blood test has been done for the patient." << p->getName() << endl;
+        string testResult = "Orthopedics blood test has been done ";
+        p->AddNewTestResults(testResult);
+        cout << testResult << " for the patient: "<< p->getName() << endl;
     }
+
     void ActionCardiologyBloodTest(Patient *p){
-        cout << "Cardiology blood test has been done for the patient" << p->getName() << endl;
+        string testResult = "Cardiology blood test has been done ";
+        p->AddNewTestResults(testResult);
+        cout << testResult<< " for the patient: " << p->getName() << endl;
     }
 };
 
@@ -204,7 +234,7 @@ public:
 class EKG : public RadioTest{
 public:
     void ExecuteRadioTest(Patient *p){
-        r->ActionEndocrinologyTest(p);
+        r->ActionEKGTest(p);
     }
 };
 
@@ -260,13 +290,13 @@ public:
     virtual void RecordPatient(Patient *p){
         bool status = CheckPersonalDemgoraficInformation(p) && CheckInsuranceInformation(p)
                         && CheckPastMedicalHistory(p) && CheckConsentForm(p);
-        cout << "Status : " << CheckPersonalDemgoraficInformation(p) << CheckInsuranceInformation(p) << CheckPastMedicalHistory(p) << CheckConsentForm(p) <<endl;
+        //cout << "Status : " << CheckPersonalDemgoraficInformation(p) << CheckInsuranceInformation(p) << CheckPastMedicalHistory(p) << CheckConsentForm(p) <<endl;
         if(status){
-            cout << "Patient record has successfully registered." << endl;
+            cout << "Patient record has successfully registered to the "<< name <<"."<< endl;
             patients.push_back(p);
         }
         else
-            cout << "Patient record has failed." << endl;
+            cout << "Patient has been failed to record to the "<< name <<"." << endl;
     }
 
     bool CheckPersonalDemgoraficInformation(Patient *p){
@@ -292,8 +322,11 @@ public:
 
     virtual bool CheckConsentForm(Patient *p) = 0;
 
-
-
+    virtual vector<Patient*> getPatients(){
+        return patients;
+    }
+protected:
+    string name;
 private:
     vector<Patient*> patients;
 };
@@ -322,14 +355,16 @@ public:
     }
 
     bool CheckConsentForm(Patient *p){
-        cout << "This is Cardiology Consent Form : " << endl << "Your signature please." << endl;
+        cout << "This is Cardiology Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
             return false;
         else
             return true;
     }
 
-    CardiologyClinic(){}
+    CardiologyClinic(){
+        name = "Cardiology Clinic";
+    }
 };
 
 //Using Abstract Factory Pattern
@@ -349,7 +384,7 @@ public:
 
     //Assumption: Orthopedics does not accept Government insurance but, it accepts all the other insurance.
     bool CheckInsuranceInformation(Patient *p){
-        if(p->getInsurance() == "Goverment" || p->getInsurance().empty())
+        if(p->getInsurance() == "Government" || p->getInsurance().empty())
             return false;
         else{
          return true;
@@ -357,14 +392,16 @@ public:
     }
 
     bool CheckConsentForm(Patient *p){
-        cout << "This is Orthopedics Consent Form : " << endl << "Your signature please." << endl;
+        cout << "This is Orthopedics Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
             return false;
         else
             return true;
     }
 
-    OrthopedicsClinic(){}
+    OrthopedicsClinic(){
+        name = "Orthopedics Clinic";
+    }
 
 };
 
@@ -384,7 +421,7 @@ public:
     }
     //Assumption: Endocrinology does not accept Government insurance excepts all the other insurance.
     bool CheckInsuranceInformation(Patient *p){
-        if(p->getInsurance() == "Goverment" || p->getInsurance().empty())
+        if(p->getInsurance() == "Government" || p->getInsurance().empty())
             return false;
         else{
          return true;
@@ -392,13 +429,15 @@ public:
     }
 
     bool CheckConsentForm(Patient *p){
-        cout << "This is Endocrinology Consent Form : " << endl << "Your signature please." << endl;
+        cout << "This is Endocrinology Consent Form : " << endl << "Your signature please: "<< p->getSignature() << endl;
         if(p->getSignature().empty())
             return false;
         else
             return true;
     }
-    EndocrinologyClinic(){}
+    EndocrinologyClinic(){
+        name = "Endocrinology Clinic";
+    }
 };
 
 //Using Command Pattern, AbstractFactory
@@ -414,44 +453,137 @@ public:
     void setPatient(Patient *p){
         this->patient = p;
     }
-    void createRadiologyTest(Department *d, Radiology *r){
-        radioTest = d->CreateRadioTest(r);
+    void setDepartment(Department* d){
+        this->department = d;
     }
-    void createLaboratoryTest(Department *d, Laboratory *lab){
-        labTest = d->CreateLabTest(lab);
+    void createRadiologyTest(Radiology *r){
+        if(radioTest!= NULL){
+            delete radioTest;
+        }
+        radioTest = department->CreateRadioTest(r);
     }
+    void createLaboratoryTest(Laboratory *lab){
+        if(labTest!= NULL){
+            delete labTest;
+        }
+        labTest = department->CreateLabTest(lab);
+    }
+    //Search patient method.
+    void searchPatient(string s){
+        vector<Patient*> temp = department->getPatients();
+        for(int i = 0 ; i < temp.size(); i++){
+            if(s == temp[i]->getEmail()){
+                cout << "Patient has been found." << endl;
+                patient = temp[i];
+            }
+        }
+        cout << "Patient is not in the department's list. " << endl;
+    }
+
 private:
     Patient *patient;
     RadioTest *radioTest;
     LabTest *labTest;
+    Department *department;
 };
+
 Radiology *Radiology::instance = NULL;
 
 int main() {
-    Doctor *dc = new Doctor();
-    Patient *motherPatient = new Patient();
-    motherPatient->setName("Erkin Russia");
-    motherPatient->setEmail("ErkinKurt@gmail.com");
-    motherPatient->setPhoneNumber("0505050550");
-    motherPatient->setSignature("BabaSignature");
-    motherPatient->setInsurance("OtherInsurance");
-    Subject *drug = new Drug();
-    Observer *patient = new Patient();
-    drug->Attach(patient);
+    //3 different departments 3 different doctors.
+    Doctor *endoDoctor = new Doctor();
+    Doctor *orthoDoctor = new Doctor();
+    Doctor *cardioDoctor = new Doctor();
 
-    drug->setDrugName("Lefkosaa ORTAM");
-    vector<string> side;
-    side.push_back("Circir");   side.push_back("Bok bocegi"); side.push_back("Aglama hamza");
-    drug->AddSideEffects(side);
+    Department *endocrinologyClinic = new EndocrinologyClinic();
     Department *orthopedicsClinic = new OrthopedicsClinic();
-    orthopedicsClinic->RecordPatient(motherPatient);
-    dc->setPatient(motherPatient);
-    Laboratory *lab = new Laboratory();
+    Department *cardiologyClinic = new CardiologyClinic();
 
-    Radiology *r = Radiology::getInstance();
-    dc->createLaboratoryTest(orthopedicsClinic, lab);
-    dc->createRadiologyTest(orthopedicsClinic, r);
-    dc->OrderRadioTest();
+    //Set the doctor's department's...
+
+    endoDoctor->setDepartment(endocrinologyClinic);
+    orthoDoctor->setDepartment(orthopedicsClinic);
+    cardioDoctor->setDepartment(cardiologyClinic);
+
+    //2 different patients with different insurances.
+
+    Patient *patient_1 = new Patient();
+    patient_1->setName("Erkin Kurt Cobain");
+    patient_1->setEmail("kurt.erkin@gmail.com");
+    patient_1->setPhoneNumber("8652353819");
+    patient_1->setSignature("ErkinKurtDigitalSignature");
+    patient_1->setInsurance("Government");
+
+    Patient *patient_2 = new Patient();
+    patient_2->setName("Hamza Melih Flagbearer");
+    patient_2->setEmail("hamza.melih@gmail.com");
+    patient_2->setPhoneNumber("8652353819");
+    patient_2->setSignature("HamzaMelihFlagbearerDigitalSignal");
+    patient_2->setInsurance("Private");
+
+
+    //Recording the patients to the departments...
+    cardiologyClinic->RecordPatient(patient_1);cout << endl;
+    orthopedicsClinic->RecordPatient(patient_1);cout << endl;
+    endocrinologyClinic->RecordPatient(patient_1);cout << endl;
+
+    cardiologyClinic->RecordPatient(patient_2);cout << endl;
+    orthopedicsClinic->RecordPatient(patient_2);cout << endl;
+    endocrinologyClinic->RecordPatient(patient_2);cout << endl;
+
+    //Laboratory and Radiology instantiation...
+    Laboratory *laboratory = new Laboratory();
+    Radiology *radiology = Radiology::getInstance();
+
+    //Ordering the tests for patient_1...
+    //First find the patient and order test. //Search Patient finds the patient and sets the patient to the doctor.
+
+    //Since the patient couldn't register to the department because of his/her insurance, doctor cant order tests.
+    endoDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
+
+    //Since the patient couldn't register to the department because of his/her insurance, doctor cant order tests.
+    orthoDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
+
+    //Since the patient has been successfully recorded to the department, doctor can order the tests.
+    cardioDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
+    cardioDoctor->createLaboratoryTest(laboratory);
+    cardioDoctor->createRadiologyTest(radiology);
+    cardioDoctor->OrderLabTest();
+    cardioDoctor->OrderRadioTest();
+
+    //Ordering the test for the patient_2...
+    endoDoctor->searchPatient("hamza.melih@gmail.com"); cout << endl;
+    endoDoctor->createLaboratoryTest(laboratory);
+    endoDoctor->createRadiologyTest(radiology);
+    endoDoctor->OrderLabTest();
+    endoDoctor->OrderRadioTest();
+
+    orthoDoctor->searchPatient("hamza.melih@gmail.com");cout << endl;
+    orthoDoctor->createLaboratoryTest(laboratory);
+    orthoDoctor->createRadiologyTest(radiology);
+    orthoDoctor->OrderLabTest();
+    orthoDoctor->OrderRadioTest();
+
+    cardioDoctor->searchPatient("hamza.melih@gmail.com");cout << endl;
+    cardioDoctor->createLaboratoryTest(laboratory);
+    cardioDoctor->createRadiologyTest(radiology);
+    cardioDoctor->OrderLabTest();
+    cardioDoctor->OrderRadioTest();cout << endl;
+
+
+    //Display the patients' test results.
+    patient_1->printTestResults();cout << endl;
+
+    patient_2->printTestResults();cout << endl;
 
 	return 0;
 }
+
+//Subject *drug = new Drug();
+    //Observer *patient = new Patient();
+    //drug->Attach(patient);
+
+    //drug->setDrugName("Lefkosaa ORTAM");
+    //vector<string> side;
+   // side.push_back("Circir");   side.push_back("Bok bocegi"); side.push_back("Aglama hamza");
+   // drug->AddSideEffects(side);
