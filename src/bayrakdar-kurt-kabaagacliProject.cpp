@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 using namespace std;
+//Forward declaration
 class Subject;
 //Using observer pattern.
 //Observer Interface
@@ -30,7 +31,6 @@ public:
 	virtual void AddSideEffects(vector<string> newSideEffects){};
 	virtual void setDrugName(string dName){}
 	virtual string getDrugName(){}
-
 private:
 	 vector<Observer*> observers;
 };
@@ -92,10 +92,10 @@ public:
     void AddRadioTest(RadioTest *radioTest){
         radioTests.push_back(radioTest);
     }
-    vector<LabTest*> getLabTest(){return this->labTests;}
+    /*vector<LabTest*> getLabTest(){return this->labTests;}
     void AddLabTest(LabTest *labTest){
         labTests.push_back(labTest);
-    }
+    }*/
     void printTestResults(){
         cout << "This is the test results for the patient : " << name << endl;
         for(int i = 0; i < testResults.size(); i++){
@@ -112,7 +112,7 @@ private:
     string insurance;
     string signature;
     vector<RadioTest*> radioTests;
-    vector<LabTest*> labTests;
+    //vector<LabTest*> labTests;
     //Drug list.
     vector<Drug*> drugs;
     //ObserverState
@@ -158,7 +158,7 @@ public:
         p->AddNewTestResults(testResult);
         cout << testResult<< " for the patient: " << p->getName() << endl;
     }
-    void ActionOrthologyBloodTest(Patient *p){
+    void ActionOrthopedicsBloodTest(Patient *p){
         string testResult = "Orthopedics blood test has been done ";
         p->AddNewTestResults(testResult);
         cout << testResult << " for the patient: "<< p->getName() << endl;
@@ -169,8 +169,8 @@ public:
         cout << testResult<< " for the patient: " << p->getName() << endl;
     }
 };
-//Using Command Pattern.
-//Command Pattern --> Abstract Command(1).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Abstract Command(1). Abstract Factory Pattern --> Abstract Product(1).
 class RadioTest {
 public:
     virtual void ExecuteRadioTest(Patient *p) = 0;
@@ -180,59 +180,59 @@ public:
 protected:
     Radiology *r;
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(1).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(1). Abstract Factory Pattern --> Concrete Product(1).
 class EndocrinologyTest : public RadioTest{
 public:
     void ExecuteRadioTest(Patient *p){
         r->ActionEndocrinologyTest(p);
     }
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(1)
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(1). Abstract Factory Pattern --> Concrete Product(1).
 class XRAY : public RadioTest{
 public:
     void ExecuteRadioTest(Patient *p){
         r->ActionXrayTest(p);
     }
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(1).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(1). Abstract Factory Pattern --> Concrete Product(1).
 class EKG : public RadioTest{
 public:
     void ExecuteRadioTest(Patient *p){
         r->ActionEKGTest(p);
     }
 };
-//Using Command Pattern.
-//Command Pattern --> Abstract Command(2).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Abstract Command(2). Abstract Factory Pattern --> Abstract Product(2).
 class LabTest {
 public:
     virtual void ExecuteLabTest(Patient *p) = 0;
-    virtual void setLabratory(Laboratory *_lab){
+    virtual void setLaboratory(Laboratory *_lab){
         lab = _lab;
     }
 protected:
     Laboratory *lab;
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(2).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(2). Abstract Factory Pattern --> Concrete Product(2).
 class EndocrinologyBloodTest : public LabTest {
 public:
     void ExecuteLabTest(Patient *p){
         lab->ActionEndocrinologyBloodTest(p);
     }
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(2).
-class OrthologyBloodTest : public LabTest {
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(2). Abstract Factory Pattern --> Concrete Product(2).
+class OrthopedicsBloodTest : public LabTest {
 public:
     void ExecuteLabTest(Patient *p){
-        lab->ActionOrthologyBloodTest(p);
+        lab->ActionOrthopedicsBloodTest(p);
     }
 };
-//Using Command Pattern
-//Command Pattern --> Concrete Command(2).
+//Using Command Pattern. Using Abstract Factory Pattern.
+//Command Pattern --> Concrete Command(2). Abstract Factory Pattern --> Concrete Product(2).
 class CardiologyBloodTest : public LabTest{
 public:
     void ExecuteLabTest(Patient *p){
@@ -240,14 +240,14 @@ public:
     }
 };
 //Using Abstract Factory, Template Pattern
-//Abstract Factory Pattern ---> Abstract Factory
-//Template method ----> Record Patient.
+//Abstract Factory Pattern ---> Abstract Factory. Template Pattern ----> Abstract Class
 class Department {
 public:
     virtual RadioTest* CreateRadioTest(Radiology *r) = 0;
     virtual LabTest* CreateLabTest(Laboratory *lab) = 0;
+    //Template method
     virtual void RecordPatient(Patient *p){
-        bool status = CheckPersonalDemgoraficInformation(p) && CheckInsuranceInformation(p)
+        bool status = CheckPersonalDemographicInformation(p) && CheckInsuranceInformation(p)
                         && CheckPastMedicalHistory(p) && CheckConsentForm(p);
         //cout << "Status : " << CheckPersonalDemgoraficInformation(p) << CheckInsuranceInformation(p) << CheckPastMedicalHistory(p) << CheckConsentForm(p) <<endl;
         if(status){
@@ -257,7 +257,8 @@ public:
         else
             cout << "Patient has been failed to record to the "<< name <<"." << endl;
     }
-    bool CheckPersonalDemgoraficInformation(Patient *p){
+    //primitive operation 1.
+    bool CheckPersonalDemographicInformation(Patient *p){
         if(p->getEmail().empty() || p->getPhoneNumber().empty()){
             return false;
         }
@@ -266,6 +267,7 @@ public:
     }
     //Assumption: If patient is already in the departments record, don't register the patient again, else register the patient.
     //We did not assume that it would differ for each department...
+    //primitive operation 2.
     bool CheckPastMedicalHistory(Patient *p){
         for(int i = 0; i < patients.size(); i++){
             if(p->getEmail() == patients[i]->getEmail()){
@@ -275,8 +277,9 @@ public:
         }
         return true;
     }
+    //primitive operation 3.
     virtual bool CheckInsuranceInformation(Patient *p) = 0;
-
+    //primitive operation 4.
     virtual bool CheckConsentForm(Patient *p) = 0;
 
     virtual vector<Patient*> getPatients(){
@@ -287,8 +290,8 @@ protected:
 private:
     vector<Patient*> patients;
 };
-//Using Abstract Factory Pattern
-//Abstract Factory Pattern ---> Concrete Factory
+//Using Abstract Factory Pattern, Template Pattern
+//Abstract Factory Pattern ---> Concrete Factory. Template Pattern --> Concrete Class.
 class CardiologyClinic : public Department{
 public:
     RadioTest* CreateRadioTest(Radiology *r){
@@ -298,7 +301,7 @@ public:
     }
     LabTest* CreateLabTest(Laboratory *lab){
         CardiologyBloodTest *c = new CardiologyBloodTest();
-        c->setLabratory(lab);
+        c->setLaboratory(lab);
         return c;
     }
     //Assumption: Cardiology accepts Government insurance and all the other insurance.
@@ -320,8 +323,8 @@ public:
         name = "Cardiology Clinic";
     }
 };
-//Using Abstract Factory Pattern
-//Abstract Factory Pattern ---> Concrete Factory
+//Using Abstract Factory Pattern, Template Pattern
+//Abstract Factory Pattern ---> Concrete Factory. Template Pattern --> Concrete Class.
 class OrthopedicsClinic : public Department {
 public:
     RadioTest* CreateRadioTest(Radiology *r){
@@ -330,8 +333,8 @@ public:
         return x;
     }
     LabTest* CreateLabTest(Laboratory *lab){
-        OrthologyBloodTest *ort = new OrthologyBloodTest();
-        ort->setLabratory(lab);
+        OrthopedicsBloodTest *ort = new OrthopedicsBloodTest();
+        ort->setLaboratory(lab);
         return ort;
     }
     //Assumption: Orthopedics does not accept Government insurance but, it accepts all the other insurance.
@@ -354,8 +357,8 @@ public:
     }
 
 };
-//Using Abstract Factory Pattern
-//Abstract Factory Pattern ---> Concrete Factory
+//Using Abstract Factory Pattern, Template Pattern
+//Abstract Factory Pattern ---> Concrete Factory. Template Pattern --> Concrete Class.
 class EndocrinologyClinic : public Department{
 public:
     RadioTest* CreateRadioTest(Radiology *r){
@@ -365,7 +368,7 @@ public:
     }
     LabTest* CreateLabTest(Laboratory *lab){
         EndocrinologyBloodTest *endo = new EndocrinologyBloodTest();
-        endo->setLabratory(lab);
+        endo->setLaboratory(lab);
         return endo;
     }
     //Assumption: Endocrinology does not accept Government insurance excepts all the other insurance.
@@ -421,11 +424,12 @@ public:
         vector<Patient*> temp = department->getPatients();
         for(int i = 0 ; i < temp.size(); i++){
             if(s == temp[i]->getEmail()){
-                cout << "Patient has been found." << endl;
+                cout << "Patient with the email " << s <<" has been found." << endl;
                 patient = temp[i];
+                return;
             }
         }
-        cout << "Patient is not in the department's list. " << endl;
+        cout << "Patient with the email " << s << " is not in the department's list. " << endl;
     }
 private:
     Patient *patient;
@@ -483,12 +487,15 @@ int main() {
     //Creating tests with abstract factory pattern. Ordering tests with command pattern.
     //First find the patient and order test. //Search Patient finds the patient and sets the patient to the doctor.
     //Since the patient couldn't register to the department because of his/her insurance, doctor cant order tests.
+    cout << endl; cout << "Endocrinology department:" << endl;
     endoDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
 
     //Since the patient couldn't register to the department because of his/her insurance, doctor cant order tests.
+    cout << endl; cout << "Orthopedics department:" << endl;
     orthoDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
 
     //Since the patient has been successfully recorded to the department, doctor can order the tests.
+    cout << endl; cout << "Cardiology department:" << endl;
     cardioDoctor->searchPatient("kurt.erkin@gmail.com"); cout << endl;
     cardioDoctor->createLaboratoryTest(laboratory);
     cardioDoctor->createRadiologyTest(radiology);
@@ -496,18 +503,21 @@ int main() {
     cardioDoctor->OrderRadioTest();
 
     //Ordering the test for the patient_2...
+    cout << endl; cout << "Endocrinology department:" << endl;
     endoDoctor->searchPatient("hamza.melih@gmail.com"); cout << endl;
     endoDoctor->createLaboratoryTest(laboratory);
     endoDoctor->createRadiologyTest(radiology);
     endoDoctor->OrderLabTest();
     endoDoctor->OrderRadioTest();
 
+    cout << endl; cout << "Orthopedics department:" << endl;
     orthoDoctor->searchPatient("hamza.melih@gmail.com");cout << endl;
     orthoDoctor->createLaboratoryTest(laboratory);
     orthoDoctor->createRadiologyTest(radiology);
     orthoDoctor->OrderLabTest();
     orthoDoctor->OrderRadioTest();
 
+    cout << endl; cout << "Cardiology department:" << endl;
     cardioDoctor->searchPatient("hamza.melih@gmail.com");cout << endl;
     cardioDoctor->createLaboratoryTest(laboratory);
     cardioDoctor->createRadiologyTest(radiology);
